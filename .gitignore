@@ -38,3 +38,6 @@ logs/
 .DS_Store
 Thumbs.db
 .vscode/
+
+.mlruns
+.mlruns/*

@@ -1,0 +1,22 @@
+artifact_path: file:///D:/Personal Projects/AIRiskManager/AiRiskManagerML/mlruns/1/models/m-808480430c494a63acfad89f3679360d/artifacts
+flavors:
+  python_function:
+    data: model.json
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.xgboost
+    python_version: 3.11.0
+  xgboost:
+    code: null
+    data: model.json
+    model_class: xgboost.sklearn.XGBClassifier
+    model_format: json
+    xgb_version: 3.2.0
+mlflow_version: 3.14.0
+model_id: m-808480430c494a63acfad89f3679360d
+model_size_bytes: 5714747
+model_uuid: m-808480430c494a63acfad89f3679360d
+prompts: null
+run_id: 4b1d6a1b2430498aa8ccb767c4b352d7
+utc_time_created: '2026-08-24 16:59:36.113581'

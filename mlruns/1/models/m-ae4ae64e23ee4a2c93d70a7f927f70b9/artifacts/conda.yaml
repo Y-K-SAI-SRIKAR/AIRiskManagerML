@@ -1,0 +1,15 @@
+channels:
+- conda-forge
+dependencies:
+- python=3.11.0
+- pip<=26.1.2
+- pip:
+  - mlflow==3.14.0
+  - cloudpickle==3.1.2
+  - numpy==1.26.4
+  - opt-einsum==3.4.0
+  - pandas==2.3.3
+  - pydot==4.0.1
+  - torch==2.13.0
+  - tqdm==4.70.0
+name: mlflow-env
