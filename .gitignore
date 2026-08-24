@@ -39,5 +39,11 @@ logs/
 Thumbs.db
 .vscode/
 
-.mlruns
-.mlruns/*
+# MLflow
+mlruns/
+mlruns/*
+
+# Environment variables
+.env
+.env.local
+.env.example
