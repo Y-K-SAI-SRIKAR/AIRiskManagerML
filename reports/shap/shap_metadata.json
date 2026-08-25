@@ -1,0 +1,213 @@
+{
+  "model_name": "AI-Risk-Manager-XGBoost",
+  "model_alias": "champion",
+  "model_version": 5,
+  "run_id": "fcd2c3e554dc47828cc388611901f52d",
+  "dataset": "data\\processed\\feature_engineered.csv",
+  "encoded_feature_count": 422,
+  "global_sample_count": 500,
+  "random_state": 42,
+  "production_threshold": 0.7,
+  "top_global_features": [
+    {
+      "feature": "categorical__P_emaildomain_prodigy.net.mx",
+      "mean_absolute_shap": 1.4323621988296509
+    },
+    {
+      "feature": "numerical__C3",
+      "mean_absolute_shap": 1.3311984539031982
+    },
+    {
+      "feature": "numerical__TransactionAmt",
+      "mean_absolute_shap": 1.23100745677948
+    },
+    {
+      "feature": "categorical__R_emaildomain_mail.com",
+      "mean_absolute_shap": 1.0733351707458496
+    },
+    {
+      "feature": "categorical__P_emaildomain_rocketmail.com",
+      "mean_absolute_shap": 1.0388647317886353
+    },
+    {
+      "feature": "numerical__id_01",
+      "mean_absolute_shap": 1.0208849906921387
+    },
+    {
+      "feature": "numerical__card1_freq",
+      "mean_absolute_shap": 1.0133785009384155
+    },
+    {
+      "feature": "categorical__P_emaildomain_protonmail.com",
+      "mean_absolute_shap": 1.0022903680801392
+    },
+    {
+      "feature": "numerical__card2",
+      "mean_absolute_shap": 0.9912543296813965
+    },
+    {
+      "feature": "numerical__TransactionDT",
+      "mean_absolute_shap": 0.9541093707084656
+    },
+    {
+      "feature": "numerical__card1",
+      "mean_absolute_shap": 0.9214004874229431
+    },
+    {
+      "feature": "numerical__TransactionHour",
+      "mean_absolute_shap": 0.8715165853500366
+    },
+    {
+      "feature": "numerical__addr1",
+      "mean_absolute_shap": 0.8618326187133789
+    },
+    {
+      "feature": "categorical__id_31_opera",
+      "mean_absolute_shap": 0.8572953343391418
+    },
+    {
+      "feature": "categorical__R_emaildomain_protonmail.com",
+      "mean_absolute_shap": 0.8512506484985352
+    },
+    {
+      "feature": "categorical__P_emaildomain_att.net",
+      "mean_absolute_shap": 0.8006974458694458
+    },
+    {
+      "feature": "categorical__P_emaildomain_mail.com",
+      "mean_absolute_shap": 0.7264471054077148
+    },
+    {
+      "feature": "categorical__id_31_chrome 59.0 for android",
+      "mean_absolute_shap": 0.7054930329322815
+    },
+    {
+      "feature": "categorical__CardType_discover_debit",
+      "mean_absolute_shap": 0.6805495619773865
+    },
+    {
+      "feature": "categorical__P_emaildomain_earthlink.net",
+      "mean_absolute_shap": 0.6660969257354736
+    },
+    {
+      "feature": "categorical__id_31_ie 11.0 for tablet",
+      "mean_absolute_shap": 0.6535191535949707
+    },
+    {
+      "feature": "categorical__P_emaildomain_hotmail.es",
+      "mean_absolute_shap": 0.6176176071166992
+    },
+    {
+      "feature": "categorical__R_emaildomain_msn.com",
+      "mean_absolute_shap": 0.6175889372825623
+    },
+    {
+      "feature": "numerical__TransactionWeek",
+      "mean_absolute_shap": 0.6142651438713074
+    },
+    {
+      "feature": "numerical__C2",
+      "mean_absolute_shap": 0.6134377121925354
+    },
+    {
+      "feature": "numerical__D1",
+      "mean_absolute_shap": 0.6055222749710083
+    },
+    {
+      "feature": "categorical__id_31_ie 11.0 for desktop",
+      "mean_absolute_shap": 0.601854681968689
+    },
+    {
+      "feature": "numerical__D15",
+      "mean_absolute_shap": 0.5887786746025085
+    },
+    {
+      "feature": "categorical__id_31_samsung browser 5.2",
+      "mean_absolute_shap": 0.5875154733657837
+    },
+    {
+      "feature": "numerical__V29",
+      "mean_absolute_shap": 0.5704562664031982
+    },
+    {
+      "feature": "numerical__TransactionWeekday",
+      "mean_absolute_shap": 0.564949095249176
+    },
+    {
+      "feature": "categorical__id_31_edge",
+      "mean_absolute_shap": 0.4981427788734436
+    },
+    {
+      "feature": "numerical__id_20",
+      "mean_absolute_shap": 0.4959581792354584
+    },
+    {
+      "feature": "categorical__P_emaildomain_msn.com",
+      "mean_absolute_shap": 0.4945489168167114
+    },
+    {
+      "feature": "categorical__P_emaildomain_juno.com",
+      "mean_absolute_shap": 0.49263039231300354
+    },
+    {
+      "feature": "categorical__id_31_samsung browser 4.2",
+      "mean_absolute_shap": 0.4791242480278015
+    },
+    {
+      "feature": "categorical__R_emaildomain_cox.net",
+      "mean_absolute_shap": 0.478508859872818
+    },
+    {
+      "feature": "categorical__id_31_comodo",
+      "mean_absolute_shap": 0.4754447042942047
+    },
+    {
+      "feature": "categorical__id_31_chrome 62.0 for android",
+      "mean_absolute_shap": 0.4560485780239105
+    },
+    {
+      "feature": "categorical__M6_F",
+      "mean_absolute_shap": 0.4502941370010376
+    },
+    {
+      "feature": "categorical__P_emaildomain_bellsouth.net",
+      "mean_absolute_shap": 0.4394897222518921
+    },
+    {
+      "feature": "categorical__id_31_chrome 60.0",
+      "mean_absolute_shap": 0.4390946626663208
+    },
+    {
+      "feature": "categorical__R_emaildomain_icloud.com",
+      "mean_absolute_shap": 0.42758098244667053
+    },
+    {
+      "feature": "categorical__id_31_google search application 49.0",
+      "mean_absolute_shap": 0.4264514446258545
+    },
+    {
+      "feature": "categorical__P_emaildomain_mac.com",
+      "mean_absolute_shap": 0.41556957364082336
+    },
+    {
+      "feature": "categorical__P_emaildomain_optonline.net",
+      "mean_absolute_shap": 0.41307082772254944
+    },
+    {
+      "feature": "numerical__card5",
+      "mean_absolute_shap": 0.4082214832305908
+    },
+    {
+      "feature": "categorical__P_emaildomain_hotmail.com",
+      "mean_absolute_shap": 0.40119966864585876
+    },
+    {
+      "feature": "categorical__id_31_firefox 59.0",
+      "mean_absolute_shap": 0.39464545249938965
+    },
+    {
+      "feature": "categorical__P_emaildomain_yahoo.com.mx",
+      "mean_absolute_shap": 0.39263999462127686
+    }
+  ]
+}

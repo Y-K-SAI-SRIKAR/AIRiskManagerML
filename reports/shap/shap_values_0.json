@@ -1,0 +1,153 @@
+{
+  "model": {
+    "name": "AI-Risk-Manager-XGBoost",
+    "alias": "champion"
+  },
+  "transaction_index": 0,
+  "prediction": "Legitimate",
+  "fraud_probability": 1.3825292093875424e-13,
+  "threshold": 0.7,
+  "base_value": 0.5183940529823303,
+  "top_features": [
+    {
+      "feature": "numerical__C2",
+      "encoded_value": 115.0,
+      "shap_value": 2.1906867027282715,
+      "absolute_shap_value": 2.1906867027282715,
+      "direction": "increases_fraud_risk"
+    },
+    {
+      "feature": "numerical__TransactionHour",
+      "encoded_value": 0.0,
+      "shap_value": -1.4967421293258667,
+      "absolute_shap_value": 1.4967421293258667,
+      "direction": "decreases_fraud_risk"
+    },
+    {
+      "feature": "categorical__P_emaildomain_prodigy.net.mx",
+      "encoded_value": 0.0,
+      "shap_value": -1.4284594058990479,
+      "absolute_shap_value": 1.4284594058990479,
+      "direction": "decreases_fraud_risk"
+    },
+    {
+      "feature": "numerical__C3",
+      "encoded_value": 0.0,
+      "shap_value": -1.3485431671142578,
+      "absolute_shap_value": 1.3485431671142578,
+      "direction": "decreases_fraud_risk"
+    },
+    {
+      "feature": "numerical__TransactionAmt",
+      "encoded_value": 107.95,
+      "shap_value": -1.2907520532608032,
+      "absolute_shap_value": 1.2907520532608032,
+      "direction": "decreases_fraud_risk"
+    },
+    {
+      "feature": "categorical__R_emaildomain_mail.com",
+      "encoded_value": 0.0,
+      "shap_value": 1.2728288173675537,
+      "absolute_shap_value": 1.2728288173675537,
+      "direction": "increases_fraud_risk"
+    },
+    {
+      "feature": "categorical__P_emaildomain_protonmail.com",
+      "encoded_value": 0.0,
+      "shap_value": 1.0590922832489014,
+      "absolute_shap_value": 1.0590922832489014,
+      "direction": "increases_fraud_risk"
+    },
+    {
+      "feature": "numerical__card2",
+      "encoded_value": 445.0,
+      "shap_value": -0.9842599034309387,
+      "absolute_shap_value": 0.9842599034309387,
+      "direction": "decreases_fraud_risk"
+    },
+    {
+      "feature": "numerical__D1",
+      "encoded_value": 163.0,
+      "shap_value": -0.9378342628479004,
+      "absolute_shap_value": 0.9378342628479004,
+      "direction": "decreases_fraud_risk"
+    },
+    {
+      "feature": "numerical__TransactionWeekday",
+      "encoded_value": 6.0,
+      "shap_value": -0.8839972019195557,
+      "absolute_shap_value": 0.8839972019195557,
+      "direction": "decreases_fraud_risk"
+    },
+    {
+      "feature": "numerical__D15",
+      "encoded_value": 442.0,
+      "shap_value": -0.8714556694030762,
+      "absolute_shap_value": 0.8714556694030762,
+      "direction": "decreases_fraud_risk"
+    },
+    {
+      "feature": "categorical__R_emaildomain_protonmail.com",
+      "encoded_value": 0.0,
+      "shap_value": 0.8522447347640991,
+      "absolute_shap_value": 0.8522447347640991,
+      "direction": "increases_fraud_risk"
+    },
+    {
+      "feature": "numerical__id_01",
+      "encoded_value": -5.0,
+      "shap_value": -0.8414294719696045,
+      "absolute_shap_value": 0.8414294719696045,
+      "direction": "decreases_fraud_risk"
+    },
+    {
+      "feature": "numerical__card1",
+      "encoded_value": 13481.0,
+      "shap_value": -0.8322636485099792,
+      "absolute_shap_value": 0.8322636485099792,
+      "direction": "decreases_fraud_risk"
+    },
+    {
+      "feature": "categorical__id_31_opera",
+      "encoded_value": 0.0,
+      "shap_value": 0.811882495880127,
+      "absolute_shap_value": 0.811882495880127,
+      "direction": "increases_fraud_risk"
+    },
+    {
+      "feature": "categorical__id_31_chrome 59.0 for android",
+      "encoded_value": 0.0,
+      "shap_value": -0.7729077935218811,
+      "absolute_shap_value": 0.7729077935218811,
+      "direction": "decreases_fraud_risk"
+    },
+    {
+      "feature": "numerical__TransactionDT",
+      "encoded_value": 7172412.0,
+      "shap_value": -0.7552036643028259,
+      "absolute_shap_value": 0.7552036643028259,
+      "direction": "decreases_fraud_risk"
+    },
+    {
+      "feature": "numerical__C9",
+      "encoded_value": 92.0,
+      "shap_value": -0.7377967834472656,
+      "absolute_shap_value": 0.7377967834472656,
+      "direction": "decreases_fraud_risk"
+    },
+    {
+      "feature": "categorical__P_emaildomain_earthlink.net",
+      "encoded_value": 0.0,
+      "shap_value": -0.7143537402153015,
+      "absolute_shap_value": 0.7143537402153015,
+      "direction": "decreases_fraud_risk"
+    },
+    {
+      "feature": "categorical__P_emaildomain_rocketmail.com",
+      "encoded_value": 0.0,
+      "shap_value": -0.6994472146034241,
+      "absolute_shap_value": 0.6994472146034241,
+      "direction": "decreases_fraud_risk"
+    }
+  ]
+}
