@@ -1,0 +1,167 @@
+# ============================================================
+# AI RISK MANAGER
+# MODEL CONFIGURATION
+# ============================================================
+
+# ============================================================
+# DATA
+# ============================================================
+
+data:
+  target_column: "isFraud"
+  id_column: "TransactionID"
+
+  test_size: 0.15
+  validation_size: 0.15
+
+  random_state: 42
+
+
+# ============================================================
+# PREPROCESSING
+# ============================================================
+
+preprocessing:
+  output_features: 422
+
+  categorical_encoding: "onehot"
+
+  handle_unknown: "ignore"
+
+
+# ============================================================
+# XGBOOST
+# ============================================================
+
+xgboost:
+
+  # Tuned parameters
+  learning_rate: 0.08
+  max_depth: 8
+  min_child_weight: 1
+
+  subsample: 0.8
+  colsample_bytree: 1.0
+
+  gamma: 0
+
+  reg_alpha: 0
+  reg_lambda: 1
+
+  # Training configuration
+  n_estimators: 1000
+
+  objective: "binary:logistic"
+
+  eval_metric: "aucpr"
+
+  tree_method: "hist"
+
+  random_state: 42
+
+  # Class imbalance
+  use_scale_pos_weight: true
+
+
+# ============================================================
+# NEURAL NETWORK
+# ============================================================
+
+neural_network:
+
+  # Tuned architecture
+  hidden_1: 512
+  hidden_2: 256
+  hidden_3: 64
+
+  dropout_1: 0.4
+  dropout_2: 0.3
+  dropout_3: 0.2
+
+  learning_rate: 0.0005
+  batch_size: 2048
+
+  weight_decay: 0.0001
+
+  epochs: 15
+  patience: 3
+
+  # Training
+  random_state: 42
+
+  # GPU configuration
+  device: "cuda"
+
+  # Automatically fall back to CPU if CUDA
+  # is unavailable.
+  allow_cpu_fallback: true
+
+
+# ============================================================
+# ENSEMBLE
+# ============================================================
+
+ensemble:
+
+  # Selected by validation PR-AUC search
+  xgboost_weight: 1.0
+  neural_network_weight: 0.0
+
+  # Selected using validation F1
+  production_threshold: 0.70
+
+  # Threshold search
+  threshold_start: 0.10
+  threshold_end: 0.90
+  threshold_step: 0.05
+
+
+# ============================================================
+# COST ANALYSIS
+# ============================================================
+
+cost:
+
+  false_positive_cost: 100
+  false_negative_cost: 5000
+
+
+# ============================================================
+# MLflow
+# ============================================================
+
+mlflow:
+
+  experiment_name: "AI-Risk-Manager"
+
+  xgboost_registered_model: "AI-Risk-Manager-XGBoost"
+
+  neural_network_registered_model: "AI-Risk-Manager-NeuralNetwork"
+
+  ensemble_registered_model: "AI-Risk-Manager-Ensemble"
+
+
+# ============================================================
+# MODEL PATHS
+# ============================================================
+
+paths:
+
+  preprocessor: "models/preprocessor.pkl"
+
+  xgboost_model: "models/xgboost_model.json"
+
+  tuned_xgboost_model: "models/tuned_xgboost_model.json"
+
+  neural_network_model: "models/neural_network_model.pt"
+
+  ensemble_config: "models/best_ensemble_config.json"
+
+  shap_output: "models/shap"
+
+
+# ============================================================
+# RANDOMNESS
+# ============================================================
+
+random_state: 42
