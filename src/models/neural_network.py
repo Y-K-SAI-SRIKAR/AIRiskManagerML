@@ -5,12 +5,16 @@ import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
 
 
+# ============================================================
+# SPARSE DATASET
+# ============================================================
+
 class SparseDataset(Dataset):
     """
     Dataset wrapper for scipy sparse matrices.
 
-    Sparse rows are kept sparse until a batch is
-    created. The batch is then converted to dense.
+    Sparse rows are kept sparse until a batch is created.
+    The batch is then converted to a dense PyTorch tensor.
     """
 
     def __init__(self, X, y):
@@ -34,13 +38,13 @@ class SparseDataset(Dataset):
         )
 
 
+# ============================================================
+# SPARSE COLLATE
+# ============================================================
+
 def sparse_collate(batch):
     """
-    Convert a batch of sparse rows into a
-    single dense PyTorch tensor.
-
-    This is considerably more efficient than
-    converting every individual row separately.
+    Convert a batch of sparse rows into a dense PyTorch tensor.
     """
 
     X_batch = np.vstack([
@@ -65,60 +69,86 @@ def sparse_collate(batch):
     )
 
 
+# ============================================================
+# FRAUD NEURAL NETWORK
+# ============================================================
+
 class FraudNeuralNetwork(nn.Module):
 
     def __init__(
         self,
-        input_size
+        input_size,
+        hidden_1=512,
+        hidden_2=256,
+        hidden_3=64,
+        dropout_1=0.4,
+        dropout_2=0.3,
+        dropout_3=0.2
     ):
 
         super().__init__()
 
         self.network = nn.Sequential(
 
+            # ----------------------------------------------
+            # Layer 1
+            # ----------------------------------------------
+
             nn.Linear(
                 input_size,
-                256
+                hidden_1
             ),
 
             nn.ReLU(),
 
             nn.BatchNorm1d(
-                256
+                hidden_1
             ),
 
             nn.Dropout(
-                0.30
+                dropout_1
             ),
 
+            # ----------------------------------------------
+            # Layer 2
+            # ----------------------------------------------
+
             nn.Linear(
-                256,
-                128
+                hidden_1,
+                hidden_2
             ),
 
             nn.ReLU(),
 
             nn.BatchNorm1d(
-                128
+                hidden_2
             ),
 
             nn.Dropout(
-                0.30
+                dropout_2
             ),
 
+            # ----------------------------------------------
+            # Layer 3
+            # ----------------------------------------------
+
             nn.Linear(
-                128,
-                64
+                hidden_2,
+                hidden_3
             ),
 
             nn.ReLU(),
 
             nn.Dropout(
-                0.20
+                dropout_3
             ),
 
+            # ----------------------------------------------
+            # Output
+            # ----------------------------------------------
+
             nn.Linear(
-                64,
+                hidden_3,
                 1
             )
         )
@@ -130,6 +160,10 @@ class FraudNeuralNetwork(nn.Module):
         ).squeeze(1)
 
 
+# ============================================================
+# TRAIN NEURAL NETWORK
+# ============================================================
+
 def train_neural_network(
     X_train,
     y_train,
@@ -137,8 +171,20 @@ def train_neural_network(
     y_val,
     epochs=10,
     batch_size=1024,
-    learning_rate=0.001
+    learning_rate=0.001,
+    hidden_1=512,
+    hidden_2=256,
+    hidden_3=64,
+    dropout_1=0.4,
+    dropout_2=0.3,
+    dropout_3=0.2,
+    weight_decay=0.0001,
+    patience=3
 ):
+
+    # ========================================================
+    # DEVICE
+    # ========================================================
 
     device = torch.device(
         "cuda"
@@ -151,9 +197,16 @@ def train_neural_network(
         f"{device}"
     )
 
-    # ==========================================
+    if device.type == "cuda":
+
+        print(
+            f"GPU: "
+            f"{torch.cuda.get_device_name(0)}"
+        )
+
+    # ========================================================
     # DATASETS
-    # ==========================================
+    # ========================================================
 
     train_dataset = SparseDataset(
         X_train,
@@ -165,12 +218,16 @@ def train_neural_network(
         y_val
     )
 
+    use_pin_memory = (
+        device.type == "cuda"
+    )
+
     train_loader = DataLoader(
         train_dataset,
         batch_size=batch_size,
         shuffle=True,
         collate_fn=sparse_collate,
-        pin_memory=torch.cuda.is_available()
+        pin_memory=use_pin_memory
     )
 
     val_loader = DataLoader(
@@ -178,22 +235,28 @@ def train_neural_network(
         batch_size=batch_size,
         shuffle=False,
         collate_fn=sparse_collate,
-        pin_memory=torch.cuda.is_available()
+        pin_memory=use_pin_memory
     )
 
-    # ==========================================
+    # ========================================================
     # MODEL
-    # ==========================================
+    # ========================================================
 
     input_size = X_train.shape[1]
 
     model = FraudNeuralNetwork(
-        input_size=input_size
+        input_size=input_size,
+        hidden_1=hidden_1,
+        hidden_2=hidden_2,
+        hidden_3=hidden_3,
+        dropout_1=dropout_1,
+        dropout_2=dropout_2,
+        dropout_3=dropout_3
     ).to(device)
 
-    # ==========================================
+    # ========================================================
     # CLASS IMBALANCE
-    # ==========================================
+    # ========================================================
 
     positive = np.sum(
         np.asarray(y_train) == 1
@@ -204,6 +267,7 @@ def train_neural_network(
     )
 
     if positive == 0:
+
         raise ValueError(
             "Training data contains "
             "no positive fraud samples."
@@ -234,26 +298,27 @@ def train_neural_network(
         f"{pos_weight_value:.4f}"
     )
 
-    # ==========================================
+    # ========================================================
     # LOSS
-    # ==========================================
+    # ========================================================
 
     criterion = nn.BCEWithLogitsLoss(
         pos_weight=pos_weight
     )
 
-    # ==========================================
+    # ========================================================
     # OPTIMIZER
-    # ==========================================
+    # ========================================================
 
     optimizer = torch.optim.Adam(
         model.parameters(),
-        lr=learning_rate
+        lr=learning_rate,
+        weight_decay=weight_decay
     )
 
-    # ==========================================
-    # BEST MODEL TRACKING
-    # ==========================================
+    # ========================================================
+    # EARLY STOPPING
+    # ========================================================
 
     best_val_loss = float(
         "inf"
@@ -261,21 +326,21 @@ def train_neural_network(
 
     best_state = None
 
-    # ==========================================
-    # TRAINING
-    # ==========================================
+    epochs_without_improvement = 0
 
-    for epoch in range(epochs):
+    # ========================================================
+    # TRAINING
+    # ========================================================
+
+    for epoch in range(
+        epochs
+    ):
 
         model.train()
 
         train_loss = 0.0
 
         for X_batch, y_batch in train_loader:
-
-            if torch.cuda.is_available():
-                X_batch = X_batch.pin_memory()
-                y_batch = y_batch.pin_memory()
 
             X_batch = X_batch.to(
                 device,
@@ -313,9 +378,9 @@ def train_neural_network(
             train_dataset
         )
 
-        # ======================================
+        # ====================================================
         # VALIDATION
-        # ======================================
+        # ====================================================
 
         model.eval()
 
@@ -324,10 +389,6 @@ def train_neural_network(
         with torch.no_grad():
 
             for X_batch, y_batch in val_loader:
-
-                if torch.cuda.is_available():
-                    X_batch = X_batch.pin_memory()
-                    y_batch = y_batch.pin_memory()
 
                 X_batch = X_batch.to(
                     device,
@@ -363,9 +424,9 @@ def train_neural_network(
             f"Val Loss: {val_loss:.5f}"
         )
 
-        # ======================================
-        # SAVE BEST MODEL
-        # ======================================
+        # ====================================================
+        # BEST MODEL
+        # ====================================================
 
         if val_loss < best_val_loss:
 
@@ -377,11 +438,34 @@ def train_neural_network(
                 in model.state_dict().items()
             }
 
-    # ==========================================
+            epochs_without_improvement = 0
+
+        else:
+
+            epochs_without_improvement += 1
+
+        # ====================================================
+        # EARLY STOPPING
+        # ====================================================
+
+        if (
+            epochs_without_improvement
+            >= patience
+        ):
+
+            print(
+                f"Early stopping triggered "
+                f"after {epoch + 1} epochs."
+            )
+
+            break
+
+    # ========================================================
     # RESTORE BEST MODEL
-    # ==========================================
+    # ========================================================
 
     if best_state is None:
+
         raise RuntimeError(
             "Neural Network training did not "
             "produce a valid model state."
@@ -407,6 +491,10 @@ def train_neural_network(
     return model
 
 
+# ============================================================
+# PREDICTION
+# ============================================================
+
 def predict_neural_network(
     model,
     X,
@@ -430,12 +518,16 @@ def predict_neural_network(
         dummy_y
     )
 
+    use_pin_memory = (
+        device.type == "cuda"
+    )
+
     loader = DataLoader(
         dataset,
         batch_size=batch_size,
         shuffle=False,
         collate_fn=sparse_collate,
-        pin_memory=torch.cuda.is_available()
+        pin_memory=use_pin_memory
     )
 
     model.eval()
@@ -445,9 +537,6 @@ def predict_neural_network(
     with torch.no_grad():
 
         for X_batch, _ in loader:
-
-            if torch.cuda.is_available():
-                X_batch = X_batch.pin_memory()
 
             X_batch = X_batch.to(
                 device,
@@ -467,6 +556,7 @@ def predict_neural_network(
             )
 
     if not probabilities:
+
         return np.array(
             [],
             dtype=np.float32
