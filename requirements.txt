@@ -11,3 +11,4 @@ pyyaml
 pytest
 fastapi
 uvicorn
+PyMySQL
