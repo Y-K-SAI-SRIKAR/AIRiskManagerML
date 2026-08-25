@@ -409,15 +409,21 @@ def main():
         # BEST XGBOOST ITERATION
         # ======================================
 
+        try:
+            best_iteration = model.best_iteration
+        except AttributeError:
+            best_iteration = model.n_estimators - 1
+
+        try:
+            best_validation_aucpr = model.best_score
+        except AttributeError:
+            best_validation_aucpr = model.evals_result()[
+                "validation_0"
+            ]["aucpr"][-1]
+
         mlflow.log_metrics({
-
-            "best_iteration": float(
-                model.best_iteration
-            ),
-
-            "best_validation_aucpr": float(
-                model.best_score
-            )
+            "best_iteration": float(best_iteration),
+            "best_validation_aucpr": float(best_validation_aucpr)
         })
 
         # ======================================

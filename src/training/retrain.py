@@ -178,27 +178,19 @@ def calculate_costs(
 
 def get_current_champion(client):
     try:
-        versions = client.search_model_versions(
-            f"name='{REGISTERED_MODEL_NAME}'"
+        champion = client.get_model_version_by_alias(
+            REGISTERED_MODEL_NAME,
+            CHAMPION_ALIAS
         )
+
+        return champion
+
     except Exception:
         return None
-
-    for version in versions:
-        aliases = list(
-            getattr(version, "aliases", []) or []
-        )
-
-        if CHAMPION_ALIAS in aliases:
-            return version
-
-    return None
-
 
 def get_run_metrics(client, run_id):
     run = client.get_run(run_id)
     return run.data.metrics
-
 
 def champion_is_better_or_equal(candidate, champion):
     """

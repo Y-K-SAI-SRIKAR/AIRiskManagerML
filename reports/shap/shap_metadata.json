@@ -1,8 +1,8 @@
 {
   "model_name": "AI-Risk-Manager-XGBoost",
   "model_alias": "champion",
-  "model_version": 5,
-  "run_id": "fcd2c3e554dc47828cc388611901f52d",
+  "model_version": 8,
+  "run_id": "6376d3051e6649fbb4061023d425f383",
   "dataset": "data\\processed\\feature_engineered.csv",
   "encoded_feature_count": 422,
   "global_sample_count": 500,
