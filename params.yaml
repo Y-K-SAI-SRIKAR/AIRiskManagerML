@@ -165,3 +165,14 @@ paths:
 # ============================================================
 
 random_state: 42
+
+risk_policy:
+  model_selection_metric: validation_pr_auc
+  threshold_selection_metric: recall_at_min_precision
+
+  minimum_precision: 0.70
+  minimum_recall: 0.70
+
+  minimum_validation_pr_auc: 0.80
+  minimum_validation_f1: 0.70
+  minimum_validation_recall: 0.70

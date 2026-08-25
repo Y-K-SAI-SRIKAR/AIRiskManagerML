@@ -33,29 +33,42 @@ from src.models.neural_network import (
 # PATHS
 # ============================================================
 
-DATA_PATH = (
-    "data/processed/feature_engineered.csv"
-)
+DATA_PATH = "data/processed/feature_engineered.csv"
 
-XGB_PARAMS_PATH = (
-    "models/best_xgboost_params.json"
-)
+XGB_PARAMS_PATH = "models/best_xgboost_params.json"
 
-NN_PARAMS_PATH = (
-    "models/best_neural_network_params.json"
-)
+NN_PARAMS_PATH = "models/best_neural_network_params.json"
 
-NN_MODEL_PATH = (
-    "models/best_neural_network.pt"
-)
+NN_MODEL_PATH = "models/best_neural_network.pt"
 
-XGB_MODEL_PATH = (
-    "models/tuned_xgboost_model.json"
-)
+XGB_MODEL_PATH = "models/tuned_xgboost_model.json"
 
-ENSEMBLE_RESULTS_PATH = (
-    "models/best_ensemble_config.json"
-)
+ENSEMBLE_RESULTS_PATH = "models/best_ensemble_config.json"
+
+
+# ============================================================
+# RISK POLICY
+# ============================================================
+#
+# These values control the production operating point.
+# They are configuration, not model-specific hardcoded
+# decisions.
+#
+# Primary threshold objective:
+#   maximize recall
+#
+# Constraint:
+#   precision must remain >= MINIMUM_PRECISION
+#
+# Model selection:
+#   validation PR-AUC
+# ============================================================
+
+MINIMUM_PRECISION = 0.70
+
+THRESHOLD_MIN = 0.10
+THRESHOLD_MAX = 0.90
+THRESHOLD_STEP = 0.01
 
 
 # ============================================================
@@ -73,7 +86,6 @@ def calculate_metrics(
     ).astype(int)
 
     return {
-
         "accuracy":
             float(
                 accuracy_score(
@@ -128,35 +140,40 @@ def calculate_metrics(
 
 
 # ============================================================
-# THRESHOLD SEARCH
+# RECALL-AWARE THRESHOLD SEARCH
 # ============================================================
 
 def find_best_threshold(
     y_true,
-    probabilities
+    probabilities,
+    minimum_precision=MINIMUM_PRECISION
 ):
 
     thresholds = np.arange(
-        0.10,
-        0.91,
-        0.05
+        THRESHOLD_MIN,
+        THRESHOLD_MAX + THRESHOLD_STEP / 2,
+        THRESHOLD_STEP
     )
 
-    best_threshold = 0.50
-    best_f1 = -1.0
-    best_metrics = None
+    eligible = []
 
     print(
-        "\n========== ENSEMBLE "
+        "\n========== RECALL-AWARE "
         "VALIDATION THRESHOLD ANALYSIS =========="
     )
 
     print(
-        f"{'Threshold':<12}"
+        f"Minimum precision constraint: "
+        f"{minimum_precision:.4f}"
+    )
+
+    print(
+        f"\n{'Threshold':<12}"
         f"{'Precision':<12}"
         f"{'Recall':<12}"
         f"{'F1':<12}"
         f"{'Fraud Flags':<15}"
+        f"{'Eligible':<10}"
     )
 
     for threshold in thresholds:
@@ -198,62 +215,90 @@ def find_best_threshold(
             predictions.sum()
         )
 
+        is_eligible = (
+            precision >= minimum_precision
+        )
+
+        if is_eligible:
+            eligible.append({
+                "threshold": threshold,
+                "precision": precision,
+                "recall": recall,
+                "f1": f1,
+                "fraud_flags": fraud_flags
+            })
+
         print(
             f"{threshold:<12.2f}"
             f"{precision:<12.4f}"
             f"{recall:<12.4f}"
             f"{f1:<12.4f}"
             f"{fraud_flags:<15}"
+            f"{'YES' if is_eligible else 'NO':<10}"
         )
 
-        if f1 > best_f1:
+    if not eligible:
+        raise RuntimeError(
+            "No validation threshold satisfies "
+            f"minimum precision={minimum_precision:.4f}"
+        )
 
-            best_f1 = f1
+    # --------------------------------------------------------
+    # PRIMARY:
+    #   maximize recall
+    #
+    # TIE BREAKER:
+    #   maximize F1
+    #
+    # FINAL TIE BREAKER:
+    #   maximize precision
+    # --------------------------------------------------------
 
-            best_threshold = threshold
-
-            best_metrics = {
-                "precision": precision,
-                "recall": recall,
-                "f1": f1
-            }
+    best = max(
+        eligible,
+        key=lambda result: (
+            result["recall"],
+            result["f1"],
+            result["precision"]
+        )
+    )
 
     print(
-        "\n========== BEST ENSEMBLE "
-        "VALIDATION THRESHOLD =========="
+        "\n========== SELECTED "
+        "RECALL-AWARE THRESHOLD =========="
     )
 
     print(
         f"Threshold: "
-        f"{best_threshold:.2f}"
+        f"{best['threshold']:.2f}"
     )
 
     print(
         f"Precision: "
-        f"{best_metrics['precision']:.4f}"
+        f"{best['precision']:.4f}"
     )
 
     print(
         f"Recall: "
-        f"{best_metrics['recall']:.4f}"
+        f"{best['recall']:.4f}"
     )
 
     print(
         f"F1: "
-        f"{best_metrics['f1']:.4f}"
+        f"{best['f1']:.4f}"
     )
 
     return (
-        float(best_threshold),
+        float(best["threshold"]),
         {
             "precision":
-                float(best_metrics["precision"]),
+                float(best["precision"]),
 
             "recall":
-                float(best_metrics["recall"]),
+                float(best["recall"]),
 
             "f1":
-                float(best_metrics["f1"])
+                float(best["f1"])
         }
     )
 
@@ -270,9 +315,9 @@ def analyze_costs(
 ):
 
     thresholds = np.arange(
-        0.10,
-        0.91,
-        0.05
+        THRESHOLD_MIN,
+        THRESHOLD_MAX + THRESHOLD_STEP / 2,
+        THRESHOLD_STEP
     )
 
     best_threshold = 0.50
@@ -333,36 +378,30 @@ def analyze_costs(
             best_threshold = threshold
 
             best_fp = fp
-
             best_fn = fn
 
     print(
-        "\n========== MINIMUM COST "
-        "THRESHOLD ON TEST =========="
+        "\n========== TEST COST ANALYSIS =========="
     )
 
     print(
-        f"Threshold: "
+        f"Minimum-cost threshold: "
         f"{best_threshold:.2f}"
     )
 
     print(
-        f"False Positives: "
-        f"{best_fp}"
+        f"False Positives: {best_fp}"
     )
 
     print(
-        f"False Negatives: "
-        f"{best_fn}"
+        f"False Negatives: {best_fn}"
     )
 
     print(
-        f"Total Cost: "
-        f"₹{best_cost:,}"
+        f"Total Cost: ₹{best_cost:,}"
     )
 
     return {
-
         "threshold":
             float(best_threshold),
 
@@ -446,7 +485,7 @@ def main():
     )
 
     # ========================================================
-    # LOAD TUNED PARAMETERS
+    # LOAD PARAMETERS
     # ========================================================
 
     with open(
@@ -498,7 +537,7 @@ def main():
     )
 
     # ========================================================
-    # TRAIN BEST XGBOOST
+    # TRAIN XGBOOST
     # ========================================================
 
     print(
@@ -518,30 +557,18 @@ def main():
     ):
 
         mlflow.set_tags({
-
-            "model_type":
-                "XGBoost",
-
-            "stage":
-                "final_tuned_model"
+            "model_type": "XGBoost",
+            "stage": "final_tuned_model"
         })
 
         model_xgb = train_xgboost(
-
             X_train_encoded,
             y_train,
-
             X_val_encoded,
             y_val,
-
             model_path=XGB_MODEL_PATH,
-
             **xgb_params
         )
-
-        # ----------------------------------------------------
-        # XGBoost probabilities
-        # ----------------------------------------------------
 
         xgb_val_prob = (
             model_xgb.predict_proba(
@@ -576,7 +603,6 @@ def main():
         )
 
         mlflow.log_metrics({
-
             "validation_pr_auc":
                 xgb_val_metrics["pr_auc"],
 
@@ -597,7 +623,7 @@ def main():
         })
 
     # ========================================================
-    # LOAD BEST NEURAL NETWORK
+    # LOAD NEURAL NETWORK
     # ========================================================
 
     print(
@@ -624,39 +650,19 @@ def main():
     )
 
     if device.type == "cuda":
-
         print(
             f"GPU: "
             f"{torch.cuda.get_device_name(0)}"
         )
 
-    # --------------------------------------------------------
-    # IMPORTANT:
-    # Build the exact architecture selected during tuning.
-    # --------------------------------------------------------
-
     model_nn = FraudNeuralNetwork(
-
-        input_size=
-            X_train_encoded.shape[1],
-
-        hidden_1=
-            nn_params["hidden_1"],
-
-        hidden_2=
-            nn_params["hidden_2"],
-
-        hidden_3=
-            nn_params["hidden_3"],
-
-        dropout_1=
-            nn_params["dropout_1"],
-
-        dropout_2=
-            nn_params["dropout_2"],
-
-        dropout_3=
-            nn_params["dropout_3"]
+        input_size=X_train_encoded.shape[1],
+        hidden_1=nn_params["hidden_1"],
+        hidden_2=nn_params["hidden_2"],
+        hidden_3=nn_params["hidden_3"],
+        dropout_1=nn_params["dropout_1"],
+        dropout_2=nn_params["dropout_2"],
+        dropout_3=nn_params["dropout_3"]
     )
 
     checkpoint = torch.load(
@@ -684,23 +690,15 @@ def main():
     # ========================================================
 
     nn_val_prob = predict_neural_network(
-
         model_nn,
-
         X_val_encoded,
-
-        batch_size=
-            nn_params["batch_size"]
+        batch_size=nn_params["batch_size"]
     )
 
     nn_test_prob = predict_neural_network(
-
         model_nn,
-
         X_test_encoded,
-
-        batch_size=
-            nn_params["batch_size"]
+        batch_size=nn_params["batch_size"]
     )
 
     nn_val_metrics = calculate_metrics(
@@ -767,10 +765,6 @@ def main():
         f"{'Validation F1':<15}"
     )
 
-    # --------------------------------------------------------
-    # Search weights in 5% increments.
-    # --------------------------------------------------------
-
     for weight_index in range(
         0,
         21
@@ -785,22 +779,14 @@ def main():
         )
 
         ensemble_val_prob = (
-
-            xgb_weight
-            * xgb_val_prob
-
+            xgb_weight * xgb_val_prob
             +
-
-            nn_weight
-            * nn_val_prob
+            nn_weight * nn_val_prob
         )
 
         metrics = calculate_metrics(
-
             y_val,
-
             ensemble_val_prob,
-
             threshold=0.5
         )
 
@@ -811,14 +797,7 @@ def main():
             f"{metrics['f1']:<15.4f}"
         )
 
-        # ----------------------------------------------------
-        # Select using VALIDATION PR-AUC.
-        # ----------------------------------------------------
-
-        if (
-            metrics["pr_auc"]
-            > best_pr_auc
-        ):
+        if metrics["pr_auc"] > best_pr_auc:
 
             best_pr_auc = (
                 metrics["pr_auc"]
@@ -856,17 +835,16 @@ def main():
     )
 
     # ========================================================
-    # VALIDATION THRESHOLD
+    # RECALL-AWARE VALIDATION THRESHOLD
     # ========================================================
 
     (
         best_threshold,
         threshold_metrics
     ) = find_best_threshold(
-
         y_val,
-
-        best_val_prob
+        best_val_prob,
+        minimum_precision=MINIMUM_PRECISION
     )
 
     # ========================================================
@@ -874,26 +852,18 @@ def main():
     # ========================================================
 
     ensemble_test_prob = (
-
-        best_xgb_weight
-        * xgb_test_prob
-
+        best_xgb_weight * xgb_test_prob
         +
-
-        best_nn_weight
-        * nn_test_prob
+        best_nn_weight * nn_test_prob
     )
 
     # ========================================================
-    # TEST @ DEFAULT 0.5
+    # TEST @ 0.5
     # ========================================================
 
     test_metrics_05 = calculate_metrics(
-
         y_test,
-
         ensemble_test_prob,
-
         threshold=0.5
     )
 
@@ -936,15 +906,12 @@ def main():
     )
 
     # ========================================================
-    # FINAL TEST @ VALIDATION THRESHOLD
+    # TEST @ VALIDATION-SELECTED THRESHOLD
     # ========================================================
 
     final_test_metrics = calculate_metrics(
-
         y_test,
-
         ensemble_test_prob,
-
         threshold=best_threshold
     )
 
@@ -996,8 +963,7 @@ def main():
     # ========================================================
 
     test_predictions = (
-        ensemble_test_prob
-        >= best_threshold
+        ensemble_test_prob >= best_threshold
     ).astype(int)
 
     print(
@@ -1006,16 +972,12 @@ def main():
 
     print(
         classification_report(
-
             y_test,
-
             test_predictions,
-
             target_names=[
                 "Legitimate",
                 "Fraud"
             ],
-
             zero_division=0
         )
     )
@@ -1025,11 +987,8 @@ def main():
     # ========================================================
 
     tn, fp, fn, tp = confusion_matrix(
-
         y_test,
-
         test_predictions,
-
         labels=[0, 1]
     ).ravel()
 
@@ -1043,23 +1002,19 @@ def main():
     )
 
     print(
-        f"True Negative: "
-        f"{tn}"
+        f"True Negative: {tn}"
     )
 
     print(
-        f"False Positive: "
-        f"{fp}"
+        f"False Positive: {fp}"
     )
 
     print(
-        f"False Negative: "
-        f"{fn}"
+        f"False Negative: {fn}"
     )
 
     print(
-        f"True Positive: "
-        f"{tp}"
+        f"True Positive: {tp}"
     )
 
     # ========================================================
@@ -1071,19 +1026,16 @@ def main():
     )
 
     print(
-        f"Frauds detected: "
-        f"{tp}"
+        f"Frauds detected: {tp}"
     )
 
     print(
-        f"Frauds missed: "
-        f"{fn}"
+        f"Frauds missed: {fn}"
     )
 
     print(
         f"Legitimate transactions "
-        f"incorrectly flagged: "
-        f"{fp}"
+        f"incorrectly flagged: {fp}"
     )
 
     # ========================================================
@@ -1091,18 +1043,14 @@ def main():
     # ========================================================
 
     cost_results = analyze_costs(
-
         y_test,
-
         ensemble_test_prob,
-
         false_positive_cost=100,
-
         false_negative_cost=5000
     )
 
     # ========================================================
-    # SAVE ENSEMBLE CONFIGURATION
+    # SAVE CONFIGURATION
     # ========================================================
 
     ensemble_config = {
@@ -1123,7 +1071,10 @@ def main():
             "validation_pr_auc",
 
         "threshold_selection_metric":
-            "validation_f1",
+            "recall_at_minimum_precision",
+
+        "minimum_precision":
+            float(MINIMUM_PRECISION),
 
         "validation_pr_auc":
             float(best_pr_auc),
@@ -1176,22 +1127,17 @@ def main():
         "confusion_matrix": {
 
             "true_negative":
-                int(tn),
+                tn,
 
             "false_positive":
-                int(fp),
+                fp,
 
             "false_negative":
-                int(fn),
+                fn,
 
             "true_positive":
-                int(tp)
+                tp
         },
-
-        # ----------------------------------------------------
-        # This is REPORTING ONLY.
-        # It must NOT be used as the production threshold.
-        # ----------------------------------------------------
 
         "test_cost_analysis":
             cost_results
@@ -1224,7 +1170,7 @@ def main():
     )
 
     # ========================================================
-    # MLFLOW
+    # MLFLOW ENSEMBLE RUN
     # ========================================================
 
     print(
@@ -1255,7 +1201,7 @@ def main():
                 "validation_pr_auc",
 
             "threshold_selection":
-                "validation_f1",
+                "recall_at_minimum_precision",
 
             "test_set_used_for_selection":
                 "false"
@@ -1271,6 +1217,9 @@ def main():
 
             "production_threshold":
                 float(best_threshold),
+
+            "minimum_precision":
+                float(MINIMUM_PRECISION),
 
             "false_positive_cost":
                 100,
@@ -1329,10 +1278,6 @@ def main():
                     final_test_metrics["pr_auc"]
                 )
         })
-
-        # ----------------------------------------------------
-        # Log configuration artifacts.
-        # ----------------------------------------------------
 
         mlflow.log_artifact(
             ENSEMBLE_RESULTS_PATH
@@ -1403,18 +1348,33 @@ def main():
     )
 
     print(
+        f"Threshold minimum precision: "
+        f"{MINIMUM_PRECISION:.4f}"
+    )
+
+    print(
         f"Validation PR-AUC: "
         f"{best_pr_auc:.4f}"
     )
 
     print(
-        f"Test PR-AUC: "
-        f"{final_test_metrics['pr_auc']:.4f}"
+        f"Validation Precision: "
+        f"{threshold_metrics['precision']:.4f}"
     )
 
     print(
-        f"Test F1: "
-        f"{final_test_metrics['f1']:.4f}"
+        f"Validation Recall: "
+        f"{threshold_metrics['recall']:.4f}"
+    )
+
+    print(
+        f"Validation F1: "
+        f"{threshold_metrics['f1']:.4f}"
+    )
+
+    print(
+        f"Test PR-AUC: "
+        f"{final_test_metrics['pr_auc']:.4f}"
     )
 
     print(
@@ -1428,10 +1388,14 @@ def main():
     )
 
     print(
+        f"Test F1: "
+        f"{final_test_metrics['f1']:.4f}"
+    )
+
+    print(
         "\n========== ENSEMBLE TUNING COMPLETE =========="
     )
 
 
 if __name__ == "__main__":
-
     main()
