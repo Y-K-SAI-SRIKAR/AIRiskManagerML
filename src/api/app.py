@@ -1,5 +1,19 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+import os
+import shutil
+import tempfile
+
+from fastapi import (
+    FastAPI,
+    HTTPException,
+    UploadFile,
+    File,
+)
+
+from src.inference.batch_predict import (
+    process_batch_csv,
+)
 
 from src.inference.predict import (
     predict_transaction,
@@ -625,3 +639,71 @@ def model_history():
             status_code=500,
             detail=str(exc),
         )
+
+# ============================================================
+# BATCH FRAUD ANALYSIS
+# ============================================================
+
+@app.post("/predict/batch")
+def predict_batch(
+    file: UploadFile = File(...),
+):
+
+    if not file.filename:
+        raise HTTPException(
+            status_code=400,
+            detail="No file uploaded.",
+        )
+
+    if not file.filename.lower().endswith(".csv"):
+        raise HTTPException(
+            status_code=400,
+            detail="Only CSV files are supported.",
+        )
+
+    temporary_path = None
+
+    try:
+
+        suffix = ".csv"
+
+        with tempfile.NamedTemporaryFile(
+            delete=False,
+            suffix=suffix,
+        ) as temp_file:
+
+            temporary_path = temp_file.name
+
+            shutil.copyfileobj(
+                file.file,
+                temp_file,
+            )
+
+        result = process_batch_csv(
+            temporary_path
+        )
+
+        return result
+
+    except ValueError as exc:
+
+        raise HTTPException(
+            status_code=400,
+            detail=str(exc),
+        )
+
+    except Exception as exc:
+
+        raise HTTPException(
+            status_code=500,
+            detail=str(exc),
+        )
+
+    finally:
+
+        if temporary_path and os.path.exists(
+            temporary_path
+        ):
+            os.remove(
+                temporary_path
+            )

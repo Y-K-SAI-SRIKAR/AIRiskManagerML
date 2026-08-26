@@ -14,3 +14,4 @@ uvicorn
 PyMySQL
 boto3
 pymysql
+python-multipart
