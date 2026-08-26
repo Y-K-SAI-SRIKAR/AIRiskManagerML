@@ -3,7 +3,7 @@ numpy
 scikit-learn
 xgboost
 torch
-mlflow
+mlflow==3.15.2
 shap
 scipy
 joblib
@@ -12,3 +12,5 @@ pytest
 fastapi
 uvicorn
 PyMySQL
+boto3
+pymysql

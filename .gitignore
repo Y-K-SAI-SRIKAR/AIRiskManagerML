@@ -1,6 +1,3 @@
-/dvc_test.txt
-
-
 # Python
 __pycache__/
 *.py[cod]
@@ -22,8 +19,6 @@ env/
 # Model artifacts
 models/*.pkl
 models/*.joblib
-
-# Generated model files
 models/*.json
 
 # Logs
@@ -39,11 +34,13 @@ logs/
 Thumbs.db
 .vscode/
 
-# MLflow
+# MLflow local tracking data
 mlruns/
 mlruns/*
 
-# Environment variables
-.env
-.env.local
-.env.example
+# DVC test files
+dvc_test.txt
+
+# Local database backups / manifests
+mlflow_backup_before_s3.sql
+mlflow_tables_backup.txt
