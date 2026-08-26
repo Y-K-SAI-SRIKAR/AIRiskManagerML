@@ -148,7 +148,7 @@ def load_production_model():
         f"models:/{REGISTERED_MODEL_NAME}@{CHAMPION_ALIAS}"
     )
 
-    model = mlflow.xgboost.load_model(model_uri)
+    model = mlflow.pyfunc.load_model(model_uri)
 
     return model
 
