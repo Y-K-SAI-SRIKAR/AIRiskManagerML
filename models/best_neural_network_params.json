@@ -1,0 +1,20 @@
+{
+    "model": "Neural Network",
+    "selection_metric": "validation_pr_auc",
+    "best_validation_pr_auc": 0.09629093684861027,
+    "best_validation_roc_auc": 0.7383391687494409,
+    "best_validation_f1": 0.16136742885491365,
+    "best_params": {
+        "hidden_1": 256,
+        "hidden_2": 128,
+        "hidden_3": 64,
+        "dropout_1": 0.2,
+        "dropout_2": 0.2,
+        "dropout_3": 0.1,
+        "learning_rate": 0.0005,
+        "batch_size": 1024,
+        "weight_decay": 1e-05,
+        "epochs": 15,
+        "patience": 3
+    }
+}

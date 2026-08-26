@@ -1,0 +1,18 @@
+{
+    "model": "XGBoost",
+    "selection_metric": "validation_pr_auc",
+    "best_validation_pr_auc": 0.8168449582235192,
+    "best_validation_roc_auc": 0.9637460352442025,
+    "best_validation_f1": 0.7424124513618677,
+    "best_params": {
+        "learning_rate": 0.08,
+        "max_depth": 8,
+        "min_child_weight": 1,
+        "subsample": 0.8,
+        "colsample_bytree": 1.0,
+        "gamma": 0,
+        "reg_alpha": 0,
+        "reg_lambda": 1
+    },
+    "scale_pos_weight": 27.5797842920354
+}

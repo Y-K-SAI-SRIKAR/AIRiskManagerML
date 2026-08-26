@@ -1,0 +1,31 @@
+{
+    "model_type": "XGBoost + Neural Network",
+    "xgb_weight": 1.0,
+    "nn_weight": 0.0,
+    "production_threshold": 0.48,
+    "selection_metric": "validation_pr_auc",
+    "threshold_selection_metric": "recall_at_minimum_precision",
+    "minimum_precision": 0.7,
+    "validation_pr_auc": 0.8168449582235192,
+    "validation_precision": 0.7000871839581517,
+    "validation_recall": 0.7770967741935484,
+    "validation_f1": 0.7365846200886714,
+    "test_accuracy": 0.9815310280985764,
+    "test_precision": 0.7188154352378103,
+    "test_recall": 0.7754114230396902,
+    "test_f1": 0.7460416019869606,
+    "test_roc_auc": 0.966024315590852,
+    "test_pr_auc": 0.8271752237226875,
+    "confusion_matrix": {
+        "true_negative": 84542,
+        "false_positive": 940,
+        "false_negative": 696,
+        "true_positive": 2403
+    },
+    "test_cost_analysis": {
+        "threshold": 0.12,
+        "false_positives": 7695,
+        "false_negatives": 294,
+        "total_cost": 2239500
+    }
+}
