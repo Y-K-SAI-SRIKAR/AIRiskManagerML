@@ -245,8 +245,20 @@ def predict_transaction(transaction):
         transaction
     )
 
-    probability = float(
-        model.predict_proba(encoded)[0, 1]
+    prediction_result = model.predict(encoded)
+
+    print(
+        "DEBUG MLflow prediction type:",
+        type(prediction_result),
+    )
+    
+    print(
+        "DEBUG MLflow prediction:",
+        prediction_result,
+    )
+    
+    raise RuntimeError(
+        "DEBUG: inspected MLflow predict() output."
     )
 
     prediction = int(
