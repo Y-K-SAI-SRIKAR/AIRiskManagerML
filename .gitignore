@@ -20,6 +20,9 @@ env/
 models/*.pkl
 models/*.joblib
 
+# Production inference preprocessor
+!models/preprocessor.pkl
+
 
 # Logs
 logs/
