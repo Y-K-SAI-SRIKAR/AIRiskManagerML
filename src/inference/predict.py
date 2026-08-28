@@ -140,7 +140,7 @@ FEATURE_COLUMNS = [
 
 
 def load_production_model():
-    """Load the model currently assigned to MLflow @champion."""
+    """Load the XGBoost model currently assigned to MLflow @champion."""
 
     configure_mlflow()
 
@@ -148,7 +148,7 @@ def load_production_model():
         f"models:/{REGISTERED_MODEL_NAME}@{CHAMPION_ALIAS}"
     )
 
-    model = mlflow.pyfunc.load_model(model_uri)
+    model = mlflow.xgboost.load_model(model_uri)
 
     return model
 
@@ -245,20 +245,8 @@ def predict_transaction(transaction):
         transaction
     )
 
-    prediction_result = model.predict(encoded)
-
-    print(
-        "DEBUG MLflow prediction type:",
-        type(prediction_result),
-    )
-    
-    print(
-        "DEBUG MLflow prediction:",
-        prediction_result,
-    )
-    
-    raise RuntimeError(
-        "DEBUG: inspected MLflow predict() output."
+    probability = float(
+        model.predict_proba(encoded)[0, 1]
     )
 
     prediction = int(
