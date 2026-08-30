@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
 import os
 import shutil
 import tempfile
@@ -32,6 +33,17 @@ app = FastAPI(
         "model benchmarking, and recall/precision trade-off API"
     ),
     version="1.3.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:6979",
+        "https://airiskmanageragent.onrender.com"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
