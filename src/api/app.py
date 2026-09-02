@@ -40,7 +40,8 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:6979",
         "https://airiskmanageragent.onrender.com",
-        "https://airiskmanagerbackend.onrender.com"
+        "https://airiskmanagerbackend.onrender.com",
+        "https://loss-less-engine.vercel.app"
     ],
     allow_credentials=True,
     allow_methods=["*"],
