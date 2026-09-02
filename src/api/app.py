@@ -39,7 +39,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:6979",
-        "https://airiskmanageragent.onrender.com"
+        "https://airiskmanageragent.onrender.com",
+        "https://airiskmanagerbackend.onrender.com"
     ],
     allow_credentials=True,
     allow_methods=["*"],
